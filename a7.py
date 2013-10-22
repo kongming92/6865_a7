@@ -16,6 +16,8 @@ class correspondence():
     self.pt1=pt1
     self.pt2=pt2
 
+### HELPERS
+
 def BW(im, weights=[0.3,0.6,0.1]):
   out = np.zeros((im.shape[0], im.shape[1]))
   (height, width, rgb) = np.shape(im)
@@ -28,6 +30,8 @@ def imIter(im):
   for y in range(0,im.shape[0]):
       for x in range(0,im.shape[1]):
           yield (y,x)
+
+### END HELPERS
 
 def computeTensor(im, sigmaG=1, factorSigma=4):
   '''im_out: 3-channel-2D array. The three channels are Ixx, Ixy, Iyy'''
@@ -69,18 +73,31 @@ def HarrisCorners(im, k=0.15, sigmaG=1, factor=4, maxiDiam=7, boundarySize=5):
 
 def computeFeatures(im, cornerL, sigmaBlurDescriptor=0.5, radiusDescriptor=4):
   '''f_list: a list of feature objects'''
-
+  lumiBlurred = ndimage.filters.gaussian_filter(BW(im), sigmaBlurDescriptor)
+  f_list = []
+  for corner in cornerL:
+    desc = descriptor(lumiBlurred, corner, radiusDescriptor)
+    desc = 1.0/desc.std() * (desc - desc.mean())
+    f_list.append(feature(corner, desc))
   return f_list
-
-  #features=map(descriptor, im, cornerL)
 
 def descriptor(blurredIm, P, radiusDescriptor=4):
   '''patch: descriptor around 2-D point P, with size (2*radiusDescriptor+1)^2 in 1-D'''
-  return patch
+  return blurredIm[P.y-radiusDescriptor:P.y+radiusDescriptor+1, P.x-radiusDescriptor:P.x+radiusDescriptor+1].flatten()
 
 def findCorrespondences(listFeatures1, listFeatures2, threshold=1.7):
   '''correpondences: a list of correspondences object that associate two feature lists.'''
-  return correspondences
+  features = [findCorrespondence(feature1, listFeatures2, threshold) for feature1 in listFeatures1]
+  return filter(lambda x: x != None, features)
+
+def findCorrespondence(feature1, listFeatures2, threshold=1.7):
+  sumSquares = [sum((feature1.descriptor - feature2.descriptor)**2) for feature2 in listFeatures2]
+  minIndex, minDistSq = (np.argmin(sumSquares), np.min(sumSquares))
+  del sumSquares[minIndex]
+  secondMinDistSq = np.min(sumSquares)
+  if secondMinDistSq / minDistSq < threshold**2:
+    return None
+  return correspondence(feature1.pt, listFeatures2[minIndex].pt)
 
 def RANSAC(listOfCorrespondences, Niter=1000, epsilon=4, acceptableProbFailure=1e-9):
   '''H_best: the best estimation of homorgraphy (3-by-3 matrix)'''
@@ -115,7 +132,6 @@ def two_scale_blending(L, refIndex, blurDescriptor=0.5, radiusDescriptor=4):
 # Helpers, you may use the following scripts for convenience.
 def A7PointToA6Point(a7_point):
   return np.array([a7_point.y, a7_point.x, 1.0], dtype=np.float64)
-
 
 def A7PairsToA6Pairs(a7_pairs):
   A7pointList1=map(lambda pair: pair.pt1 ,a7_pairs)

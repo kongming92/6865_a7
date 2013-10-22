@@ -167,9 +167,9 @@ def _magic123(im):
 
 # test_ComputeTensor()
 # test_cornerResponse()
-test_HarrisCorners()
+# test_HarrisCorners()
 # test_computeFeatures()
-# test_findCorrespondence()
+test_findCorrespondence()
 # test_RANSAC()
 # test_autostitch()
 # test_autostitch2()
