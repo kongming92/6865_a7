@@ -1,6 +1,5 @@
 import numpy as np
-import scipy
-from scipy import ndimage
+from scipy import ndimage, linalg
 
 class point():
   def __init__(self, x, y):
@@ -48,13 +47,25 @@ def computeTensor(im, sigmaG=1, factorSigma=4):
 
 def cornerResponse(im, k=0.15, sigmaG=1, factorSigma=4):
   '''resp: 2D array charactering the response'''
-
+  tensor = computeTensor(im, sigmaG, factorSigma)
+  resp  = np.zeros((im.shape[0], im.shape[1]))
+  for y, x in imIter(resp):
+    M = np.array([[tensor[y, x, 0], tensor[y, x, 1]], [tensor[y, x, 1], tensor[y, x, 2]]])
+    R = linalg.det(M) - k * (np.trace(M)**2)
+    if R > 0:
+      resp[y, x] = R
   return resp
 
 def HarrisCorners(im, k=0.15, sigmaG=1, factor=4, maxiDiam=7, boundarySize=5):
   '''result: a list of points that locate the images' corners'''
-
-  return result
+  possibleCorners = cornerResponse(im, k, sigmaG, factor)
+  maxima = ndimage.filters.maximum_filter(possibleCorners, maxiDiam)
+  corners = (possibleCorners == maxima)
+  corners[possibleCorners == 0] = False
+  height, width = corners.shape
+  corners[0:boundarySize] = corners[height-1:height-boundarySize-1:-1] = False
+  corners[:,0:boundarySize] = corners[:,width-1:width-boundarySize-1:-1] = False
+  return [point(x[1], x[0]) for x in np.transpose(np.nonzero(corners))]
 
 def computeFeatures(im, cornerL, sigmaBlurDescriptor=0.5, radiusDescriptor=4):
   '''f_list: a list of feature objects'''

@@ -7,12 +7,11 @@ def test_ComputeTensor():
   im=io.imread('pano/stata-1.png', 1.0)
   tensor=a7.computeTensor(im)
   foo=max(tensor.flatten())
-  io.imwrite(tensor/foo, 'tensor_vis.png')
+  io.imwrite(tensor/foo, 'tensor_vis.png', 1.0)
 
 def test_cornerResponse():
   im=io.imread('pano/stata-1.png', 1.0)
   resp=a7.cornerResponse(im)
-
   foo=max(resp.flatten())
   io.imwrite(_magic123(resp/foo),'resp.png', 1.0)
 
@@ -166,9 +165,9 @@ def _magic123(im):
 
 #===Tests=====
 
-test_ComputeTensor()
+# test_ComputeTensor()
 # test_cornerResponse()
-# test_HarrisCorners()
+test_HarrisCorners()
 # test_computeFeatures()
 # test_findCorrespondence()
 # test_RANSAC()
