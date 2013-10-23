@@ -128,7 +128,6 @@ def RANSAC(listOfCorrespondences, Niter=5000, epsilon=4, acceptableProbFailure=1
       H_best = H.copy()
     if (1 - (float(numInliers) / len(listOfCorrespondences))**4) ** n < acceptableProbFailure:
       break
-  print numInliers
   return (H_best, inliers)
 
 def computeNHomographies(L, refIndex, blurDescriptor=0.5, radiusDescriptor=4):
