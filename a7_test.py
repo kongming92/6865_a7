@@ -50,7 +50,7 @@ def test_autostitch():
   im1=io.imread('pano/stata-1.png', 1.0)
   im2=io.imread('pano/stata-2.png', 1.0)
   im_list=[im1, im2]
-  out=a7.autostitch(im_list, 0)
+  out=a7.autostitch(im_list, 1)
   io.imwrite(out, 'panorama.png', 1.0)
 
 def test_autostitch2():
@@ -169,10 +169,10 @@ def _magic123(im):
 # test_cornerResponse()
 # test_HarrisCorners()
 # test_computeFeatures()
-test_findCorrespondence()
+# test_findCorrespondence()
 # test_RANSAC()
 # test_autostitch()
-# test_autostitch2()
+test_autostitch2()
 # test_linear_blending()
 # test_linear_blending2()
 # test_two_scale_blending()
