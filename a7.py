@@ -101,7 +101,7 @@ def findCorrespondence(feature1, listFeatures2, threshold=1.7):
     return None
   return correspondence(feature1.pt, listFeatures2[minIndex].pt)
 
-def RANSAC(listOfCorrespondences, Niter=5000, epsilon=4, acceptableProbFailure=1e-9):
+def RANSAC(listOfCorrespondences, Niter=1000, epsilon=4, acceptableProbFailure=1e-9):
   '''H_best: the best estimation of homorgraphy (3-by-3 matrix)'''
   '''inliers: A list of booleans that describe whether the element in listOfCorrespondences
   an inlier or not'''
@@ -159,15 +159,53 @@ def autostitch(L, refIndex, blurDescriptor=0.5, radiusDescriptor=4):
 
 def weight_map(h,w):
   ''' Given the image dimension h and w, return the hxwx3 weight map for linear blending'''
+  w_map = np.zeros((h, w, 3))
+  halfHeight = float(h/2)
+  halfWidth = float(w/2)
+  for y, x in imIter(w_map):
+    w_map[y, x] = (1 - abs(y - halfHeight)/halfHeight) * (1 - abs(x - halfWidth)/halfWidth)
   return w_map
 
 def linear_blending(L, refIndex, blurDescriptor=0.5, radiusDescriptor=4):
   ''' Return the stitching result with linear blending'''
-  return out
+  H_list = computeNHomographies(L, refIndex, blurDescriptor, radiusDescriptor)
+  weights = weight_map(L[0].shape[0], L[0].shape[1])
+  return compositeNImages(L, H_list, weights)
 
 def two_scale_blending(L, refIndex, blurDescriptor=0.5, radiusDescriptor=4):
   ''' Return the stitching result with two scale blending'''
   return out
+
+def compositeNImages(listOfImages, listOfH, weights):
+  # Computes the composite image. listOfH is of the form returned by computeNHomographies.
+  # Hint: You will need to deal with bounding boxes and translations again in this function.
+  bbox = a6.computeTransformedBBox(listOfImages[0].shape, listOfH[0])
+  for img, H in zip(listOfImages, listOfH):
+    currentbbox = a6.computeTransformedBBox(img.shape, H)
+    bbox = a6.bboxUnion(currentbbox, bbox)
+  trans = a6.translate(bbox)
+  out = np.zeros((bbox[1][0] - bbox[0][0], bbox[1][1] - bbox[0][1], 3))
+  weightIm = np.zeros((out.shape[0], out.shape[1], 3))
+  for img, H in zip(listOfImages, listOfH):
+    applyHomographyFast(img, out, trans.dot(H), weights, weightIm, True)
+  weightIm[weightIm == 0] = np.min(weightIm[weightIm.nonzero()]) # no zero in denominators
+  return out / weightIm
+
+def applyHomographyFast(source, out, H, weights, weightIm, bilinear=False):
+  # takes the image source, warps it by the homography H, and adds it to the composite out.
+  # This version should only iterate over the pixels inside the bounding box of source's image in out.
+  bbox = a6.computeTransformedBBox(source.shape, H)
+  Hinv = linalg.inv(H)
+  for y in xrange(bbox[0][0], bbox[1][0]):
+    for x in xrange(bbox[0][1], bbox[1][1]):
+      yp, xp, w = Hinv.dot(np.array([y, x, 1.0]))
+      yp, xp = (yp / w, xp / w)
+      if yp >= 0 and yp < source.shape[0] and xp >= 0 and xp < source.shape[1]:
+        weightIm[y, x] += weights[yp, xp]
+        if bilinear:
+          out[y, x] += weights[yp, xp] * a6.interpolateLin(source, yp, xp)
+        else:
+          out[y, x] += weights[yp, xp] * source[int(round(yp)), int(round(xp))]
 
 # Helpers, you may use the following scripts for convenience.
 def A7PointToA6Point(a7_point):
