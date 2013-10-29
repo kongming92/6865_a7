@@ -2,7 +2,7 @@ import png
 import numpy
 
 baseInputPath='./'
-baseOutputPath='./'
+baseOutputPath='Output/'
 
 def imread(path='in.png', gamma=2.2):
     '''reads a PNG RGB image at baseInputPath+path and return a numpy array organized along Y, X, channel.
@@ -12,7 +12,7 @@ def imread(path='in.png', gamma=2.2):
     im=reader.asFloat()
     a=numpy.vstack(im[2])
     if im[3]['greyscale']:
-        raise NameError( 'Expected an RGB image, given a greyscale one')        
+        raise NameError( 'Expected an RGB image, given a greyscale one')
     x, y=im[0], im[1]
     a.resize(y, x, 3)
     a**=gamma
@@ -21,7 +21,7 @@ def imread(path='in.png', gamma=2.2):
 def imreadGrey(path='raw.png'):
     '''reads a PNG greyscale image at baseInputPath+path and return a numpy array organized along Y, X.
     The values are encoded as float and are assumed to be linear in the input file (gamma is NOT decoded)'''
-    global baseInputPath    
+    global baseInputPath
     reader=png.Reader(baseInputPath+path)
     im=reader.asFloat()
     a=numpy.vstack(im[2])
@@ -69,7 +69,7 @@ def constantIm(y, x, color=0):
     out = numpy.empty([y, x, 3])
     out[:, :]=color
     return out
-    
+
 def emptyIm(im):
     return numpy.empty([numpy.shape(im)[0], numpy.shape(im)[1], 3])
 

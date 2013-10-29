@@ -167,17 +167,17 @@ def _magic123(im):
 
 #===Tests=====
 
-# test_ComputeTensor()
-# test_cornerResponse()
-# test_HarrisCorners()
-# test_computeFeatures()
-# test_findCorrespondence()
-# test_RANSAC()
-# test_autostitch()
-# test_autostitch2()
-# test_linear_blending()
+test_ComputeTensor()
+test_cornerResponse()
+test_HarrisCorners()
+test_computeFeatures()
+test_findCorrespondence()
+test_RANSAC()
+test_autostitch()
+test_autostitch2()
+test_linear_blending()
 test_linear_blending2()
-# test_two_scale_blending()
-# test_two_scale_blending2()
+test_two_scale_blending()
+test_two_scale_blending2()
 
 

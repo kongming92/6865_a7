@@ -174,9 +174,18 @@ def linear_blending(L, refIndex, blurDescriptor=0.5, radiusDescriptor=4):
 
 def two_scale_blending(L, refIndex, blurDescriptor=0.5, radiusDescriptor=4):
   ''' Return the stitching result with two scale blending'''
-  return out
+  spatialSigma = 2
+  H_list = computeNHomographies(L, refIndex, blurDescriptor, radiusDescriptor)
+  weights = weight_map(L[0].shape[0], L[0].shape[1])
+  L_lowFreq = [ndimage.filters.gaussian_filter(im, [spatialSigma, spatialSigma, 0]) for im in L]
+  L_highFreq = [im - imL for im, imL in zip(L, L_lowFreq)]
+  panoLow = compositeNImages(L_lowFreq, H_list, weights)
+  panoHigh = compositeNImages(L_highFreq, H_list, weights, True)
+  return panoLow + panoHigh
 
-def compositeNImages(listOfImages, listOfH, weights):
+### MODIFIED FROM A6
+
+def compositeNImages(listOfImages, listOfH, weights, abrupt = False):
   # Computes the composite image. listOfH is of the form returned by computeNHomographies.
   # Hint: You will need to deal with bounding boxes and translations again in this function.
   bbox = a6.computeTransformedBBox(listOfImages[0].shape, listOfH[0])
@@ -187,11 +196,11 @@ def compositeNImages(listOfImages, listOfH, weights):
   out = np.zeros((bbox[1][0] - bbox[0][0], bbox[1][1] - bbox[0][1], 3))
   weightIm = np.zeros((out.shape[0], out.shape[1], 3))
   for img, H in zip(listOfImages, listOfH):
-    applyHomographyFast(img, out, trans.dot(H), weights, weightIm, True)
+    applyHomographyFast(img, out, trans.dot(H), weights, weightIm, abrupt)
   weightIm[weightIm == 0] = np.min(weightIm[weightIm.nonzero()]) # no zero in denominators
   return out / weightIm
 
-def applyHomographyFast(source, out, H, weights, weightIm, bilinear=False):
+def applyHomographyFast(source, out, H, weights, weightIm, abrupt = False):
   # takes the image source, warps it by the homography H, and adds it to the composite out.
   # This version should only iterate over the pixels inside the bounding box of source's image in out.
   bbox = a6.computeTransformedBBox(source.shape, H)
@@ -201,11 +210,12 @@ def applyHomographyFast(source, out, H, weights, weightIm, bilinear=False):
       yp, xp, w = Hinv.dot(np.array([y, x, 1.0]))
       yp, xp = (yp / w, xp / w)
       if yp >= 0 and yp < source.shape[0] and xp >= 0 and xp < source.shape[1]:
-        weightIm[y, x] += weights[yp, xp]
-        if bilinear:
+        if abrupt and weights[yp, xp, 0] > weightIm[y, x, 0]:
+          weightIm[y, x] = weights[yp, xp]
+          out[y, x] = weights[yp, xp] * a6.interpolateLin(source, yp, xp)
+        elif not abrupt:
+          weightIm[y, x] += weights[yp, xp]
           out[y, x] += weights[yp, xp] * a6.interpolateLin(source, yp, xp)
-        else:
-          out[y, x] += weights[yp, xp] * source[int(round(yp)), int(round(xp))]
 
 # Helpers, you may use the following scripts for convenience.
 def A7PointToA6Point(a7_point):
