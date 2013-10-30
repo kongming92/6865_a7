@@ -50,10 +50,8 @@ def test_autostitch():
   im1=io.imread('pano/stata-1.png', 1.0)
   im2=io.imread('pano/stata-2.png', 1.0)
   im_list=[im1, im2]
-  out1=a7.autostitch(im_list, 0)
-  out2=a7.autostitch(im_list, 1)
-  io.imwrite(out1, 'panorama1-1.png', 1.0)
-  io.imwrite(out2, 'panorama1-2.png', 1.0)
+  out=a7.autostitch(im_list, 0)
+  io.imwrite(out, 'panorama1.png', 1.0)
 
 def test_autostitch2():
   im1=io.imread('pano/guedelon-1.png', 1.0)
@@ -93,9 +91,19 @@ def test_two_scale_blending2():
   im3=io.imread('pano/guedelon-3.png', 1.0)
   im4=io.imread('pano/guedelon-4.png', 1.0)
   im_list=[im1, im2, im3, im4]
-  out=a7.two_scale_blending(im_list, 1)
-  io.imwrite(out, 'two_scale_blending2.png', 1.0)
+  out1=a7.two_scale_blending(im_list, 0)
+  io.imwrite(out1, 'two_scale_blending2-1.png', 1.0)
+  out2=a7.two_scale_blending(im_list, 1)
+  io.imwrite(out2, 'two_scale_blending2-2.png', 1.0)
 
+def test_myPano():
+  im1 = io.imread('pano/house1.png', 1.0)
+  im2 = io.imread('pano/house2.png', 1.0)
+  im3 = io.imread('pano/house3.png', 1.0)
+  im_list = [im1, im2, im3]
+  # io.imwrite(a7.autostitch(im_list, 1), 'auto_stitch_house.png', 1.0)
+  # io.imwrite(a7.linear_blending(im_list, 1), 'linear_blending_house.png', 1.0)
+  io.imwrite(a7.two_scale_blending(im_list, 1), 'two_scale_blending_house.png', 1.0)
 
 
 # Helpers for visualization
@@ -167,17 +175,18 @@ def _magic123(im):
 
 #===Tests=====
 
-test_ComputeTensor()
-test_cornerResponse()
-test_HarrisCorners()
-test_computeFeatures()
-test_findCorrespondence()
-test_RANSAC()
-test_autostitch()
-test_autostitch2()
-test_linear_blending()
-test_linear_blending2()
-test_two_scale_blending()
-test_two_scale_blending2()
+# test_ComputeTensor()
+# test_cornerResponse()
+# test_HarrisCorners()
+# test_computeFeatures()
+# test_findCorrespondence()
+# test_RANSAC()
+# test_autostitch()
+# test_autostitch2()
+# test_linear_blending()
+# test_linear_blending2()
+# test_two_scale_blending()
+# test_two_scale_blending2()
+test_myPano()
 
 

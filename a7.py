@@ -31,8 +31,8 @@ def BW(im, weights=[0.3,0.6,0.1]):
 
 def imIter(im):
   for y in range(0,im.shape[0]):
-      for x in range(0,im.shape[1]):
-          yield (y,x)
+    for x in range(0,im.shape[1]):
+      yield (y,x)
 
 ### END HELPERS
 
@@ -143,13 +143,13 @@ def computeNHomographies(L, refIndex, blurDescriptor=0.5, radiusDescriptor=4):
   homographies = [np.zeros((3,3))] * N
   homographies[refIndex] = np.identity(3)
   for i in xrange(N):
-      if i < refIndex:
-          homographies[i] = reduce(lambda x, y: x.dot(y), H_i[i:refIndex], np.identity(3))
-      elif i > refIndex:
-          if refIndex == 0:
-              homographies[i] = reduce(lambda x, y: x.dot(linalg.inv(y)), H_i[i-1::-1], np.identity(3))
-          else:
-              homographies[i] = reduce(lambda x, y: x.dot(linalg.inv(y)), H_i[i-1:refIndex-1:-1], np.identity(3))
+    if i < refIndex:
+      homographies[i] = reduce(lambda x, y: x.dot(y), H_i[i:refIndex], np.identity(3))
+    elif i > refIndex:
+      if refIndex == 0:
+          homographies[i] = reduce(lambda x, y: x.dot(linalg.inv(y)), H_i[i-1::-1], np.identity(3))
+      else:
+          homographies[i] = reduce(lambda x, y: x.dot(linalg.inv(y)), H_i[i-1:refIndex-1:-1], np.identity(3))
   return homographies
 
 def autostitch(L, refIndex, blurDescriptor=0.5, radiusDescriptor=4):
