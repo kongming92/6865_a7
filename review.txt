@@ -1,1 +1,49 @@
-# Write down your review here
+This is a review of the paper "Image Deblurring with Blurred/Noisy Image Pairs" by Yuan, Sun, Quan and Shum, published in SIGGRAPH 2007.
+
+By: Charles Liu
+
+1. Description
+
+The paper describes a method for deblurring / denoising images by using a pair of images, one blurry and one noisy. One common application for this is photography in low-light situations. In these situations (assuming fixed aperture), the photographer has the option of decreasing shutter speed, leading to motion blur, or increasing ISO, leading to amplified noise. The method described by this paper matches this scenario exactly. By using information from the sharp but noisy image, the method is able to produce a good estimation of the convolution kernel that represents the motion blur. The method then uses two other techniques, residual deconvolution and de-ringing with gain-controlled RL, to perfect the output image. As their results show, the method described outperforms preexisting methods noticeably in both sharpness of detail as well as removal of noise.
+
+Many of the tools used in the techniques described here have already existed. The authors use existing techniques to compute a denoised image with which to estimate the blur kernel, and perform the estimation using the existing Landweber method. Furthermore, deconvolution is implemented using the Richardson-Lucy (RL) algorithm. However, as described in sections 4-6, the paper makes key improvements to these existing techniques. The idea of deconvolving using the residual image and the use of a gain-controlled RL algorithm are novel ideas that greatly improve the performance, as shown in figures 5 and 6. Although the paper's scope is limited to one situation -- namely the combination of blur and noisy images -- and requires exactly two images, it appears to have solved a common problem among photographers using relatively easily implementable tools.
+
+2. Clarity of Exposition
+
+Overall, the paper is very well-written. In particular, the introduction did a good job of explaining why the work done by the paper is necessary, and the previous work explained the deficiencies of preexisting techniques. Readers should feel comfortable when beginning to read the paper, since it frames the results in a context that most individuals who have done photography can understand -- namely, the problem of low-light blur versus noise problem.
+
+In particular, the explanation of blind versus non-blind deconvolution and the issues facing each were well explained in section 2. However, it would have been helpful to include an example of the ringing effect, such as the one given in figure 7(b), to provide the reader with a more concrete example of the problem facing non-blind deconvolution. The section on kernel estimation (section 4) is relatively long, and while it describes a large chunk of the methods, it would have been helpful to have an overview. For example, in the discussion about improvements over blind deconvolution, a statement that the technique used in the paper is non-blind, with the denoised image N_D used as a good approximation for the actual image would have made things more clear. Further, it would have been useful to have a sentence describing each of the sub-headings along with its purpose in the larger picture. This way, there is an overview and readers know what to expect as they go through the entire section. A similar suggestion can be made for section 6, where the introduction to the section could specify that, first, a gain-controlled RL algorithm will be applied, which will suppress fine image details. The details would then be added later.
+
+One thing that was done very well was the inclusion of figures 5 and 6, where the signal of various images and operations on those images such as denoising and deconvolution, are shown in 1-dimensional space. This reduction in the dimensionality of the problem allows the reader to focus on the relevant points being made. It also gives a very clear depiction of the advantages of gain-controlled RL in figure 6, since it is very easy to distinguish among the lines plotted which method is the most preferable.
+
+3. Quality of References
+
+Without familiarity with all of the references, it is definitely convincing that the authors did their work in exploring the existing methods and improving upon them instead of simply recreating them. The amount of previous work discussed and evaluated is an impressive list. The description of the methods used also has a good number of references, especially before equations are introduced, making the equations easier to accept. I was a bit confused about the mention of HDR images. While the application of HDR to some of these situations makes a bit of sense, it was unclear how the HDR techniques related to the techniques discussed in this paper.
+
+4. Reproducibility
+
+The reproducibility of the method described in the paper appears to be good. From what I can tell, the mathematical steps in the process are sound. So long as we accept the assertion that the "denoised image N_D is a very good initial approximation to I for the purpose of kernel estimation", the rest of the math is simply the application of existing solutions to existing problems. Other math included the introduction of the gain control I_gain. The formula used to to determine the value of I_gain is simple and intuitive.
+
+The reproducibility of this technique is supported by the various example images used throughout. The images contain regions of extremely fine detail as well as uniform backgrounds. Some of the images have objects of a single color, while others have a lot of color detail. In all of the images, we see that the quality of the resulting outputs is very high -- better than any other method that was compared. It is quite convincing that this method can handle many different scenarios and is quite reproducible.
+
+However, one item not addressed in the paper is the quality of the exposure needed. For example, what if we were in low light situations, but there was a flashlight in the corner? How little light can there be? Presumably, with very little light, blur and noise will both increase, and it is not very clear how well the techniques described respond to these extremes.
+
+5. Rating - numerical rating omitted
+
+6. Review expertise - omitted
+
+7. Explanation of Rating
+
+Overall, I would recommend a very high rating for this paper. The problem that is addressed is very real, and the solution appears to be robust.
+
+The strengths of the paper lie in the simplicity and elegance of the mathematics involved and its accessibility to a general audience. An amateur photographer who experiences these issues in his or her own work while also having some programming and computational photography experience would be able to use these tools to better their images. Nonetheless, the techniques developed in this paper represent real refinements to existing techniques and describes an innovative way to combine different techniques to solve the problem of blur and noise in images. The mathematics involved is not too convoluted: in particular, convolution, least squares, and bilateral filtering are all relevant techniques in image processing. Building upon existing mathematical techniques makes the procedure more easily understood.
+
+The inclusion of the numerous examples makes the robustness of the solution clear. In particular, the way that the paper broke down the intermediate steps (as in figures 2, 7, and 9), and compared each intermediate step with preexisting intermediate steps makes the advantages of this method extremely clear.
+
+Other than the suggestions in the exposition section of this review, I would also suggest some short explanations of some of the math. Even though many of the equations come from pre-existing methods, it would be nice to have a summary of the reasons why the equations are what they are, if this explanation didn't take up too much space. There could also be a bit more explanation in the "implementation details" section, which would focus more on the implementation of the algorithm (and its runtime, for example), instead of just talking about how to take the two pictures.
+
+Overall, I learned a lot from this paper and hope to see it implemented!
+
+8. Outstanding question
+
+As mentioned in section 4 of my review, my biggest outstanding question is how tolerant this method is of not-"ideal" image quality. Even in low light settings, the examples given were in fairly controlled settings -- indoors, mostly uniform lighting. I would be curious to see how the algorithm performs in trickier settings, such as with glare, or directional lighting.

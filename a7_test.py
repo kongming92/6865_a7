@@ -101,9 +101,9 @@ def test_myPano():
   im2 = io.imread('pano/house2.png', 1.0)
   im3 = io.imread('pano/house3.png', 1.0)
   im_list = [im1, im2, im3]
-  # io.imwrite(a7.autostitch(im_list, 1), 'auto_stitch_house.png', 1.0)
+  io.imwrite(a7.autostitch(im_list, 1), 'auto_stitch_house.png', 1.0)
   # io.imwrite(a7.linear_blending(im_list, 1), 'linear_blending_house.png', 1.0)
-  io.imwrite(a7.two_scale_blending(im_list, 1), 'two_scale_blending_house.png', 1.0)
+  # io.imwrite(a7.two_scale_blending(im_list, 1), 'two_scale_blending_house.png', 1.0)
 
 
 # Helpers for visualization
